@@ -2,29 +2,45 @@
 
 # We instantiate a dictionary to use in place of the switch statement
 
+class validation_tools():
+    
+    @staticmethod
+    def validate_int(n, input_text):
+        n = input(input_text)
+        try: n = int(n)
+        except : 
+            print("Your input is invalid")
+            return -1
+        return n
+
+    @staticmethod
+    def validate_choice(choice, input_text, n, menu_dictionary):
+        choice = validation_tools.validate_int(choice, input_text)
+        if(choice == -1): 
+            return choice;
+        elif(choice == 2 and n == 0):
+            print("No sequence inserted! Insert a sequence first")
+            return -1;
+        if(choice > len(menu_dictionary)):
+            print("Invalid choice! ")
+            return -1;
+        return choice
+    
 class sequence_analyzer():
 
     def __init__(self):
         self.n = 0
         self.sequence = []
-        self.menu_dictionary = {
-              1: self.sequence_input,
-              2: self.prob_13,
-              3: self.prob_16,
-              4: self.quitM
-            }
-        
-    def quitM(self): print("Quitting...")
 
     def sequence_input(self):
         self.n = -1
         while(self.n == -1):
-            self.n = self.validate_int(self.n, "Input sequence count: ")
+            self.n = validation_tools.validate_int(self.n, "Input sequence count: ")
         if(len(self.sequence) > 0): self.sequence = []
         for i in range(0, self.n):
             input_value = -1
             while(input_value == -1):
-                input_value = self.validate_int(input_value, "Input a number of said sequence: ")
+                input_value = validation_tools.validate_int(input_value, "Input a number of said sequence: ")
             self.sequence.append(input_value)
         print(self.sequence)
         
@@ -76,26 +92,19 @@ class sequence_analyzer():
         if(lM == 1): return "No sequence found"
         return self.sequence[psM : psM + lM]
     
-    def validate_int(self, n, input_text):
-        n = input(input_text)
-        try: n = int(n)
-        except : 
-            print("Your input is invalid")
-            return -1
-        return n
-
-    def validate_choice(self, choice, input_text):
-        choice = self.validate_int(choice, input_text)
-        if(choice == -1): 
-            return choice;
-        elif(choice == 2 and self.n == 0):
-            print("No sequence inserted! Insert a sequence first")
-            return -1;
-        if(choice > len(self.menu_dictionary)):
-            print("Invalid choice! ")
-            return -1;
-        return choice
-
+class menu():
+    
+    def __init__(self):
+        self.analyzer = sequence_analyzer()
+        self.menu_dictionary = {
+              1: self.analyzer.sequence_input,
+              2: self.analyzer.prob_13,
+              3: self.analyzer.prob_16,
+              4: self.quitM
+            }
+    
+    def quitM(self): print("Quitting...")
+    
     def display_Menu(self):
         choice = -1
         print("Option 1: Sequence insertion")
@@ -103,10 +112,10 @@ class sequence_analyzer():
         print("Option 3: P 16")
         print("Option 4: Exit")
         while(choice == -1): 
-            choice = self.validate_choice(choice, "Select an option: ")
+            choice = validation_tools.validate_choice(choice, "Select an option: ", self.analyzer.n, self.menu_dictionary)
         return choice;
 
-    def main_function(self):
+    def update_menu(self):
         menu_code = -1;
         while(menu_code != 4):
             menu_code = self.display_Menu()
@@ -114,8 +123,10 @@ class sequence_analyzer():
                 print(self.menu_dictionary[menu_code]())
             self.menu_dictionary[menu_code]()
 
-seq = sequence_analyzer()
-seq.main_function()
+
+
+main_menu = menu()
+main_menu.update_menu()
 
     
 
