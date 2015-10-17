@@ -1,12 +1,9 @@
-from Main_Package.Sequence_Handler import insert_at_index, delete_from_index, delete_subsequence, replace_sequence
+#from Main_Package.Sequence_Handler import display_even, display_prime, insert_at_index, delete_from_index, \
+#                                            delete_subsequence, replace_sequence, sum_subsequence,\
+#    gcd_subsequence, max_subsequence, display_sorted_reverse, filter_prime,\
+#    filter_negative, undo
     
-sequence = []        
-LSO_sequence = []   
-menu_dictionary = {
-                    'add': insert_at_index,
-                    'delete index': delete_from_index,
-                    'delete subsequence': delete_subsequence,
-                    'replace subsequence': replace_sequence,
-                    'display': lambda sequence: print(sequence),
-                    'quit' : lambda sequence: print('Quitting...')
-                    }
+LSO_sequence = []
+noCopy = False
+    
+ 
