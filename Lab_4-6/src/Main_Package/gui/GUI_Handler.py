@@ -8,10 +8,13 @@ from Main_Package.domain.Sequence_Handler import display_even, display_prime, in
                                             delete_subsequence, replace_sequence, sum_subsequence,\
     gcd_subsequence, max_subsequence, display_sorted_reverse, filter_prime,\
     filter_negative, undo
-from Main_Package.utils.String_Methods import get_word_count
+
 from Main_Package.domain import config
+from Main_Package.utils.String_Methods import get_word_count
 from Main_Package.utils.Validation_Tools import validate_int
 
+
+# A dictionary containing all the available commands and their assigned function
 menu_dictionary = {
                     'add': insert_at_index,
                     'delete index': delete_from_index,
@@ -27,7 +30,7 @@ menu_dictionary = {
                     'filter prime' : filter_prime,
                     'filter negative' : filter_negative,
                     'undo' : undo,
-                    'quit' : lambda sequence: print('Quitting...')
+                    'quit' : lambda sequence: print('Quitting...'),
                     }
 
 def get_keywords(menu_split):
@@ -36,6 +39,12 @@ def get_keywords(menu_split):
         Example: 
                 - "replace subsequence 1 3 5 with 4 5" will return ["replace subsequence", "with"]
                 - "delete index 1" will return ["delete index"]
+                
+        Input:
+            -menu_split - The command string
+        
+        Returns:
+            An array containing all identified keystrings
     """
     key_list = []
     key_string = ''
@@ -56,6 +65,13 @@ def get_keywords(menu_split):
 def get_numbers(menu_split, startIndex):
     """
         Gets the first array of numbers encountered after a given index
+        
+        Input:
+            -menu_split - The command string, split into an array of strings by the ' ' character
+            -sequence - The base sequences
+            
+        Returns:
+            The first array of numbers encountered
     """
     num_array = []
     for i in range(startIndex, len(menu_split)):
@@ -69,6 +85,14 @@ def process_command(sequence, menu_split):
     """
         Process a given command in order to determine the called function and it's parameters
         If the command is valid, the function is called
+        
+        Input: 
+            -menu_split - The command string, split into an array of strings by the ' ' character
+            -sequence - The base sequence
+            
+        Returns:
+            The sequence, modified by the function called by the command string if the command is executed successfully
+            The unmodified sequence, if the command string is invalid, or the function call fails
     """
     keystring_list = get_keywords(menu_split)
     num_list = get_numbers(menu_split, get_word_count(keystring_list[0]))
@@ -76,8 +100,8 @@ def process_command(sequence, menu_split):
     except : 
         print('Invalid command')
         return sequence
-    if(len(keystring_list) >= 2 and keystring_list[1] == 'with'):
-            num_list = [num_list, get_numbers(menu_split, get_word_count(keystring_list[0]) + 1 + len(num_list))]
+    if(len(keystring_list) >= 2 and keystring_list[1] == 'with'):  # If we find the keyword with, we have a command of the form [ keystring number_list with numbar_list ] 
+            num_list = [num_list, get_numbers(menu_split, get_word_count(keystring_list[0]) + 1 + len(num_list))] # the list num_list becomes an array of two number lists
     try : 
         temp_sequence = f(sequence, *num_list)
         config.noCopy = False
@@ -90,7 +114,7 @@ def process_command(sequence, menu_split):
     
 def display_Menu(sequence):
     """
-        Awaits for input
+        Displays the menu, waits for and processes commands
     """
     menu_split = [' ']
     while(menu_split[0] != 'quit'):

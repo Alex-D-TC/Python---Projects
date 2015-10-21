@@ -17,12 +17,16 @@ def save_sequence(sequence):
         config.LSO_sequence.append(deepcopy(sequence))
         config.noCopy = True
 
-def insert_at_index(sequence, n, index = -1):
+def insert_at_index(sequence, n, index = None):
     """
         Inserts an element at a given index.
         If the index is left on it's default value(-1), then the element is simply appended
+        
+        Returns:
+            - The original sequence, if the indexes fail validation
+            - The modified sequence
     """
-    if(index == -1): index = len(sequence)
+    if(index == None): index = len(sequence)
     if (not validate_index(sequence, index)):
         print('Invalid index')
         return sequence
@@ -38,9 +42,9 @@ def delete_from_index(sequence, index = -1):
         print('Invalid index')
         return sequence
     save_sequence(sequence)
-    for i in range(index, len(sequence) - 1):
-        sequence[i] = sequence[i + 1]
-    return sequence[:len(sequence) - 1]
+    sequence.pop(index)
+    return sequence
+    # Another possible solution: return sequence[0:index] + sequence[index + 1: len(sequence)]
 
 def delete_subsequence(sequence, index_start, index_end):
     """
@@ -85,17 +89,19 @@ def replace_sequence(sequence, target, value):
     indexList = fetch_index(sequence, target, 0)
     if(len(indexList) != 0): 
         save_sequence(sequence)
+    else:
+        print("Subsequence not found")
     for j in range(0, len(indexList)):
         count = 0
-        for i in range(indexList[j], indexList[j] + len(value)):
+        for i in range(indexList[j], indexList[j] + len(value)):    # We insert the subsequences at the given indexes
             sequence = insert_at_index(sequence, value[count], i)
             count += 1
-        sequence = delete_subsequence(sequence, indexList[j] + count, indexList[j] + len(target) - 1 + count)
+        sequence = delete_subsequence(sequence, indexList[j] + count, indexList[j] + len(target) - 1 + count) # We delete the specified subsequences
         for i in range(j, len(indexList)):
-            indexList[i] -= len(target) - len(value)
+            indexList[i] -= len(target) - len(value)    # We offset the rest of the indexes, relative to the new sequence
     return sequence
     
-def display_prime(sequence, index_start = 0, index_end = -1):
+def display_prime(sequence, index_start = -1, index_end = -1):
     """
         Prints a list containing all prime numbers in the given subsequence
     """
@@ -109,7 +115,7 @@ def display_prime(sequence, index_start = 0, index_end = -1):
     print(result_list)
     return sequence
 
-def display_even(sequence, index_start = 0, index_end = -1):
+def display_even(sequence, index_start = -1, index_end = -1):
     """
         Prints a list containing all the even numbers in the given subsequence
     """
@@ -207,7 +213,6 @@ def undo(sequence):
     """
     if(config.LSO_sequence[len(config.LSO_sequence) - 1] == sequence):
         print('Undo is unnecessary')
-        return sequence
     temp_sequence = deepcopy(config.LSO_sequence[len(config.LSO_sequence) - 1])
     config.LSO_sequence = config.LSO_sequence[:len(config.LSO_sequence) - 1]
     return temp_sequence

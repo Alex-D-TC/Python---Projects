@@ -6,6 +6,13 @@ Created on Oct 16, 2015
 def isPrime(value):
     """
         Checks if a given number is prime
+        
+        Input:
+            - value - The number to check
+            
+        Returns:
+            - True if the number is prime
+            - False if the number is not prime
     """
     if(value == 1 or value == -1): return False
     if(value % 2 == 0 and value != 2): return False
