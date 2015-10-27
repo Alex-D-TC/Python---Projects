@@ -11,3 +11,9 @@ def get_word_count(string):
             - string - The string to validate
     """
     return len(string.split(sep = ' '))
+
+def get_string_at(split, index):
+    """
+    
+    """
+    return split[index]
