@@ -22,10 +22,9 @@ class Validator():
         """
         try: n = int(n)
         except : 
-            return None
+            raise ValueError("Number is invalid")
         if(n < min or n > max):
-            print("Input outside of specified range")
-            return None
+            raise ValueError("Number is outside of the given range")
         return n
     
     @staticmethod

@@ -5,15 +5,19 @@ Created on Oct 23, 2015
 '''
 
 from Main_Package.repository.Sequence_Handler import Sequence_Handler
-from Main_Package.utils.String_Methods import get_word_count, get_string_at
+from Main_Package.utils.String_Methods import get_word_count, get_index
 from Main_Package.validator.Validation_Tools import Validator
 
 class Command_Handler:
-    
+    """
+        Handles the parsing of commands.
+    """
     def __init__(self):
-        # A dictionary containing all the available commands and their assigned function
+        """
+            The constructor
+        """
         self.Sequence_Handler = Sequence_Handler()
-        self.menu_dictionary = {
+        self.menu_dictionary = {                  # A dictionary containing all the available commands and their assigned function
                             'add': Sequence_Handler.insert_at_index,
                             'delete index': Sequence_Handler.delete_from_index,
                             'delete subsequence': Sequence_Handler.delete_subsequence,
@@ -28,7 +32,7 @@ class Command_Handler:
                             'filter prime' : Sequence_Handler.filter_prime,
                             'filter negative' : Sequence_Handler.filter_negative,
                             'undo' : Sequence_Handler.undo,
-                            'quit' : lambda : print('Quitting...'),
+                            'quit' : lambda temp: 'Quitting...'
                             }
     
     def get_keywords(self, menu_split):
@@ -47,14 +51,15 @@ class Command_Handler:
         key_list = []
         key_string = ''
         for i in range(0, len(menu_split)):
-            num = Validator.validate_int(menu_split[i], -10000, 10000)
-            if(num == None):
-                key_string += menu_split[i] + ' '
-            else :
+            try: 
+                num = Validator.validate_int(get_index(menu_split,i), -10000, 10000)
                 if(key_string != ''):
                     key_string = key_string[:len(key_string) - 1]
                     key_list.append(key_string)
-                key_string = '' 
+                key_string = ''  
+            except ValueError as e:
+                if(get_index(e.args, 0) == "Number is invalid"):
+                    key_string += get_index(menu_split,i) + ' '
         if(key_string != ''):
             key_string = key_string[:len(key_string) - 1]
             key_list.append(key_string)
@@ -73,8 +78,8 @@ class Command_Handler:
         """
         num_array = []
         for i in range(startIndex, len(menu_split)):
-            num = Validator.validate_int(menu_split[i], -10000, 10000)
-            if(num == None):
+            try: num = Validator.validate_int(menu_split[i], -10000, 10000)
+            except ValueError:
                 break
             num_array.append(num)
         return num_array
@@ -94,10 +99,10 @@ class Command_Handler:
         """
         keystring_list = self.get_keywords(menu_split)
         num_list = self.get_numbers(menu_split, get_word_count(keystring_list[0]))
-        try : f = self.menu_dictionary[get_string_at(keystring_list, 0)]
+        try : f = self.menu_dictionary[get_index(keystring_list, 0)]
         except : 
             raise ValueError("Invalid command")
-        if(len(keystring_list) == 2 and get_string_at(keystring_list, 1) == 'with'):  # If we find the keyword with, we have a command of the form [ keystring number_list with numbar_list ] 
-                num_list = [num_list, self.get_numbers(menu_split, get_word_count(get_string_at(keystring_list, 0)) + 1 + len(num_list))] # the list num_list becomes an array of two number lists
+        if(len(keystring_list) == 2 and get_index(keystring_list, 1) == 'with'):  # If we find the keyword with, we have a command of the form [ keystring number_list with numbar_list ] 
+                num_list = [num_list, self.get_numbers(menu_split, get_word_count(get_index(keystring_list, 0)) + 1 + len(num_list))] # the list num_list becomes an array of two number lists
         temp_sequence = f(self.Sequence_Handler, *num_list)
         return temp_sequence

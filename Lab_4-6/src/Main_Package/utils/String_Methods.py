@@ -12,8 +12,8 @@ def get_word_count(string):
     """
     return len(string.split(sep = ' '))
 
-def get_string_at(split, index):
+def get_index(split, index):
     """
-    
+        Returns the string at a given index of the array
     """
     return split[index]

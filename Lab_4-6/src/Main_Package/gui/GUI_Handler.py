@@ -5,7 +5,7 @@ Created on Oct 14, 2015
 '''
 
 from Main_Package.controller.Command_Handler import Command_Handler
-from Main_Package.utils.String_Methods import get_string_at
+from Main_Package.utils.String_Methods import get_index
 
 class GUI_Handler:
     
@@ -24,7 +24,7 @@ class GUI_Handler:
                 sequence = self.Command_Handler.process_command(menu_split)
                 print(sequence)
             except TypeError as e:
-                if(get_string_at(e.args[0].split(sep = " "), 1) == 'takes'): print('Invalid command')
+                if(get_index(e.args[0].split(sep = " "), 1) == 'takes'): print('Invalid command')
                 else: print(e.args[0])
             except ValueError as e:
                 print (e.args[0])

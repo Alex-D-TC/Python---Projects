@@ -48,11 +48,12 @@ class Sequence_Handler():
             Fails if the indexes are invalid
         """
         Validator.validate_index(self.Sequence_Store.sequence, index_start, index_end)
-        self.save_sequence()
+        self.save_sequence(True)
         i = index_end - index_start + 1
         while(i > 0):
             sequence = self.delete_from_index(index_start)
             i = i - 1
+        self.Sequence_Store.noCopy = False
         return sequence
     
     def is_sub_sequence(self, target, index):
@@ -84,7 +85,7 @@ class Sequence_Handler():
         """
         indexList = self.fetch_index(target, 0)
         if(len(indexList) != 0): 
-            self.save_sequence()
+            self.save_sequence(True)
         else:
             raise ValueError('Sequence not found')
         for j in range(0, len(indexList)):
@@ -198,11 +199,14 @@ class Sequence_Handler():
             self.Sequence_Store.sequence = deepcopy(result_sequence)
         return result_sequence
     
-    def save_sequence(self):
+    def save_sequence(self, setNoCopy = False):
         """
             Saves the subsequence if the noCopy flag has not been triggered
         """
-        self.Sequence_Store.LSO_sequence.append(deepcopy(self.Sequence_Store.sequence))
+        if(not self.Sequence_Store.noCopy):
+            self.Sequence_Store.LSO_sequence.append(deepcopy(self.Sequence_Store.sequence))
+            if(setNoCopy):
+                self.Sequence_Store.noCopy = True
     
     def undo(self):
         """
