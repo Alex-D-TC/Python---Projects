@@ -17,8 +17,8 @@ class Validator():
                 - max - The maximum available value
                 
             Returns:
-                - None if the number is invalid
                 - The number, converted to int, if it's valid
+            Raises ValueError if the validation fails
         """
         try: n = int(n)
         except : 
@@ -40,6 +40,6 @@ class Validator():
                 - index_start - The starting index
                 - intex_end - The ending index
         """
-        if(index_end == -1): index_end = len(sequence)
-        if(index_start > index_end or index_start < 0 or index_end > len(sequence)):
+        if(index_end == -1): index_end = len(sequence) - 1
+        if(index_start > index_end or index_start < 0 or index_end >= len(sequence)):
             raise IndexError('Invalid index...')

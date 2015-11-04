@@ -7,6 +7,7 @@ Created on Oct 23, 2015
 from Main_Package.repository.Sequence_Handler import Sequence_Handler
 from Main_Package.utils.String_Methods import get_word_count, get_index
 from Main_Package.validator.Validation_Tools import Validator
+from Main_Package.utils.FileStream_Retriever import FileStream_Retriever
 
 class Command_Handler:
     """
@@ -16,13 +17,14 @@ class Command_Handler:
         """
             The constructor
         """
-        self.Sequence_Handler = Sequence_Handler()
+        self.sequence_handler = Sequence_Handler()
         self.menu_dictionary = {                  # A dictionary containing all the available commands and their assigned function
                             'add': Sequence_Handler.insert_at_index,
                             'delete index': Sequence_Handler.delete_from_index,
                             'delete subsequence': Sequence_Handler.delete_subsequence,
                             'replace subsequence': Sequence_Handler.replace_sequence,
                             'display' : Sequence_Handler.display_sequence,
+                            'display menu': lambda temp: FileStream_Retriever.retrieve_text('Readme.txt'),
                             'display prime' : Sequence_Handler.display_prime,
                             'display even' : Sequence_Handler.display_even,
                             'display sorted reverse' : Sequence_Handler.display_sorted_reverse,
@@ -32,6 +34,7 @@ class Command_Handler:
                             'filter prime' : Sequence_Handler.filter_prime,
                             'filter negative' : Sequence_Handler.filter_negative,
                             'undo' : Sequence_Handler.undo,
+                            'redo' : Sequence_Handler.redo,
                             'quit' : lambda temp: 'Quitting...'
                             }
     
@@ -102,7 +105,9 @@ class Command_Handler:
         try : f = self.menu_dictionary[get_index(keystring_list, 0)]
         except : 
             raise ValueError("Invalid command")
-        if(len(keystring_list) == 2 and get_index(keystring_list, 1) == 'with'):  # If we find the keyword with, we have a command of the form [ keystring number_list with numbar_list ] 
-                num_list = [num_list, self.get_numbers(menu_split, get_word_count(get_index(keystring_list, 0)) + 1 + len(num_list))] # the list num_list becomes an array of two number lists
-        temp_sequence = f(self.Sequence_Handler, *num_list)
+        if(len(keystring_list) == 2 and get_index(keystring_list, 1) != 'with'):  # If we find the keyword with, we have a command of the form [ keystring number_list with numbar_list ]     
+            raise ValueError('Invalid input')
+        elif(len(keystring_list) == 2):    
+            num_list = [num_list, self.get_numbers(menu_split, get_word_count(get_index(keystring_list, 0)) + 1 + len(num_list))] # the list num_list becomes an array of two number lists
+        temp_sequence = f(self.sequence_handler, *num_list)
         return temp_sequence

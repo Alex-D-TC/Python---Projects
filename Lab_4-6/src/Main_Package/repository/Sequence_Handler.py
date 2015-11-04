@@ -12,12 +12,19 @@ from copy import deepcopy
 class Sequence_Handler():
     
     def __init__(self):
-        self.Sequence_Store = Sequence_Store()
+        """
+            The constructor
+            Instantiates the sequence_store field
+        """
+        self.sequence_store = Sequence_Store()
 
     def display_sequence(self):
-        return self.Sequence_Store.sequence
+        """
+            Returns the sequence, usually for display purposes
+        """
+        return self.sequence_store.sequence
     
-    def insert_at_index(self, n, index = None):
+    def insert_at_index(self, n, index = None, noCopy = False):
         """
             Inserts an element at a given index.
             If the index is left on it's default value(-1), then the element is simply appended
@@ -25,144 +32,214 @@ class Sequence_Handler():
             Returns:
                 - The original sequence, if the indexes fail validation
                 - The modified sequence
+            Raises IndexError if the given index is invalid
         """
-        if(index == None): index = len(self.Sequence_Store.sequence)
-        Validator.validate_index(self.Sequence_Store.sequence, index)
-        self.save_sequence()
-        self.Sequence_Store.sequence.insert(index, n)
-        return self.Sequence_Store.sequence
+        if(index == None or index == len(self.sequence_store.sequence)): index = len(self.sequence_store.sequence) # We consider this value implicitly valid
+        else: Validator.validate_index(self.sequence_store.sequence, index)
+        self.sequence_store.sequence.insert(index, n)
+        if(not noCopy):
+            self._save_sequence()
+        return self.sequence_store.sequence
             
-    def delete_from_index(self, index = -1):
+    def delete_from_index(self, index = -1, noCopy = False):
         """
-            Removes the element from a given index
+           Deletes the number from a given index
+           Input:
+               index - The index to delete from
+               noCopy - A flag used to stop the saving of the sequence
+                      - Set to true when the method is called by another member method
+            Returns:
+                The modified sequence
+            Raises IndexError if the given index is invalid
         """
-        Validator.validate_index(self.Sequence_Store.sequence, index)
-        self.save_sequence()
-        self.Sequence_Store.sequence.pop(index)
-        return self.Sequence_Store.sequence
+        Validator.validate_index(self.sequence_store.sequence, index)
+        self.sequence_store.sequence.pop(index)
+        if(not noCopy):
+            self._save_sequence()
+        return self.sequence_store.sequence
         # Another possible solution: return sequence[0:index] + sequence[index + 1: len(sequence)]
     
-    def delete_subsequence(self, index_start, index_end):
+    def delete_subsequence(self, index_start, index_end, noCopy = False):
         """
             Removes the subsequence contained within the given indexes
-            Fails if the indexes are invalid
+            Input:
+                index_start - The starting index
+                index_end - The end index
+                noCopy - A flag used to stop the saving of the sequence
+                      - Set to true when the method is called by another member method
+            Returns:
+                The modified sequence
+            Raises IndexError if any of the indexes are invalid
         """
-        Validator.validate_index(self.Sequence_Store.sequence, index_start, index_end)
-        self.save_sequence(True)
+        Validator.validate_index(self.sequence_store.sequence, index_start, index_end)
         i = index_end - index_start + 1
         while(i > 0):
-            sequence = self.delete_from_index(index_start)
+            sequence = self.delete_from_index(index_start, True)
             i = i - 1
-        self.Sequence_Store.noCopy = False
+        if(not noCopy):
+            self._save_sequence()
         return sequence
     
-    def is_sub_sequence(self, target, index):
+    def _is_sub_sequence(self, target, index):
+        """
+            Finds the first occurrence of a subsequence in the sequence
+            The search starts at a given index
+            Input:
+                target - The target subsequence
+                index - The starting point of the current search
+            Returns:
+                The starting index of the subsequence, if it's found
+                -1 if there is no subsequence
+            
+        """
         for i in range(0, len(target)):
-            if(i + index > len(self.Sequence_Store.sequence) - 1): 
+            if(i + index > len(self.sequence_store.sequence) - 1): 
                 return -1
-            if(self.Sequence_Store.sequence[i + index] != target[i]):
+            if(self.sequence_store.sequence[i + index] != target[i]):
                 return -1
         return i
     
-    def fetch_index(self, target, start_index):
+    def _fetch_index(self, target, start_index):
         """
             Returns a list containing the starting index of all the subsequences matching the target subsequence
+            Input:
+                target - The target subsequence
+                index - The starting point of the search
+            Returns:
+                A list containing all found indexes
         """
         indexList = []
         i = start_index
-        while(i < len(self.Sequence_Store.sequence)):
-            result = self.is_sub_sequence(target, i)
+        while(i < len(self.sequence_store.sequence)):
+            result = self._is_sub_sequence(target, i)
             if(result != -1):
                 indexList.append(i)
-                if(i + result < len(self.Sequence_Store.sequence)):
+                if(i + result < len(self.sequence_store.sequence)):
                     i += result
             i += 1
         return indexList
     
     def replace_sequence(self, target, value):
         """
-            Replaces all the subsequences equal with the target subsequence with the given value subsequence
+            Replaces all occurrences of the target subsequence with the given value subsequence
+            Input:
+                target - The target subsequence
+                value - The replacement subsequence
+            Returns:
+                The modified subsequence, if it has been modified
+            Raises ValueError if the target has not been found
         """
-        indexList = self.fetch_index(target, 0)
-        if(len(indexList) != 0): 
-            self.save_sequence(True)
-        else:
-            raise ValueError('Sequence not found')
+        indexList = self._fetch_index(target, 0)
         for j in range(0, len(indexList)):
             count = 0
             for i in range(indexList[j], indexList[j] + len(value)):    # We insert the subsequences at the given indexes
-                sequence = self.insert_at_index(value[count], i)
+                sequence = self.insert_at_index(value[count], i, True)
                 count += 1
-            sequence = self.delete_subsequence(indexList[j] + count, indexList[j] + len(target) - 1 + count) # We delete the specified subsequences
+            sequence = self.delete_subsequence(indexList[j] + count, indexList[j] + len(target) - 1 + count, True) # We delete the specified subsequences
             for i in range(j, len(indexList)):
                 indexList[i] -= len(target) - len(value)    # We offset the rest of the indexes, relative to the new sequence
+        if(len(indexList) != 0): 
+            self._save_sequence()
+        else:
+            raise ValueError('Sequence not found')
         return sequence
         
     def display_prime(self, index_start = -1, index_end = -1):
         """
             Prints a list containing all prime numbers in the given subsequence
+            Input:
+                index_start - The starting index
+                index_end - The ending index
+            Returns:
+                A list of all prime numbers between the given indexes
+            Raises IndexError if any of the indexes are invalid
         """
-        
         result_list = []
-        Validator.validate_index(self.Sequence_Store.sequence, index_start, index_end)
+        Validator.validate_index(self.sequence_store.sequence, index_start, index_end)
         for i in range(index_start, index_end + 1):
-            if(isPrime(self.Sequence_Store.sequence[i])):
-                result_list.append(self.Sequence_Store.sequence[i])
+            if(isPrime(self.sequence_store.sequence[i])):
+                result_list.append(self.sequence_store.sequence[i])
         return result_list
     
     def display_even(self, index_start = -1, index_end = -1):
         """
-            Prints a list containing all the even numbers in the given subsequence
+            Prints a list containing all even numbers in the given subsequence
+            Input:
+                index_start - The starting index
+                index_end - The ending index
+            Returns:
+                A list of all even numbers between the given indexes
+            Raises IndexError if any of the indexes are invalid
         """
         
         result_list = []
-        Validator.validate_index(self.Sequence_Store.sequence, index_start, index_end)
+        Validator.validate_index(self.sequence_store.sequence, index_start, index_end)
         for i in range(index_start, index_end + 1):
-            if(self.Sequence_Store.sequence[i] % 2 == 0):
-                result_list.append(self.Sequence_Store.sequence[i])
+            if(self.sequence_store.sequence[i] % 2 == 0):
+                result_list.append(self.sequence_store.sequence[i])
         return result_list
     
     def sum_subsequence(self, index_start = 0, index_end = -1):
         """
             Prints the sum of all the numbers in the given subsequence
+            Input:
+                index_start - The starting index
+                index_end - The ending index
+            Returns:
+                The sum of all elements between the given indexes
+            Raises IndexError if any of the indexes are invalid
         """
         
         result = 0
-        Validator.validate_index(self.Sequence_Store.sequence, index_start, index_end)
+        Validator.validate_index(self.sequence_store.sequence, index_start, index_end)
         for i in range(index_start, index_end + 1):
-            result += self.Sequence_Store.sequence[i]
+            result += self.sequence_store.sequence[i]
         return result
     
     def gcd_subsequence(self, index_start = 0, index_end = -1):
         """
-            Prints the GCD of all the elements in a the given subsequence
+            Prints the gcd of all the numbers in the given subsequence
+            Input:
+                index_start - The starting index
+                index_end - The ending index
+            Returns:
+                The gcd of all elements between the given indexes
+            Raises IndexError if any of the indexes are invalid
         """
         
         result = 0
-        Validator.validate_index(self.Sequence_Store.sequence, index_start, index_end)
+        Validator.validate_index(self.sequence_store.sequence, index_start, index_end)
         for i in range(index_start, index_end):
-            result = gcd(self.Sequence_Store.sequence[i], self.Sequence_Store.sequence[i+1])
+            result = gcd(self.sequence_store.sequence[i], self.sequence_store.sequence[i+1])
         return result
     
     def max_subsequence(self, index_start = 0, index_end = -1):
         """
-            Prints the greatest element in a given subsequence
+            Prints the greatest element of all the numbers in the given subsequence
+            Input:
+                index_start - The starting index
+                index_end - The ending index
+            Returns:
+                The greatest element of all elements between the given indexes
+            Raises IndexError if any of the indexes are invalid
         """
         
-        Validator.validate_index(self.Sequence_Store.sequence, index_start, index_end)
-        result = self.Sequence_Store.sequence[index_start]
+        Validator.validate_index(self.sequence_store.sequence, index_start, index_end)
+        result = self.sequence_store.sequence[index_start]
         for i in range(index_start + 1, index_end + 1):
-            if(self.Sequence_Store.sequence[i] > result):
-                result = self.Sequence_Store.sequence[i]
+            if(self.sequence_store.sequence[i] > result):
+                result = self.sequence_store.sequence[i]
         return result
     
     def display_sorted_reverse(self):
         """
             Prints a sorted version of the given sequence
             The sequence is sorted in a descending order
+            Returns:
+                The index sorted in a descending order
         """
         
-        temp_sequence = deepcopy(self.Sequence_Store.sequence)
+        temp_sequence = deepcopy(self.sequence_store.sequence)
         
         for i in range(0, len(temp_sequence) - 1):
             for j in range(i, len(temp_sequence)):
@@ -176,45 +253,64 @@ class Sequence_Handler():
     def filter_prime(self):
         """
             Eliminates all numbers that are not prime from the sequence
+            Returns:
+                A sequence containing all prime numbers of the sequence
         """
         result_sequence = []
-        for i in range(0, len(self.Sequence_Store.sequence)):
-            if(isPrime(self.Sequence_Store.sequence[i])):
-                result_sequence.append(self.Sequence_Store.sequence[i])
-        if(len(result_sequence) != len(self.Sequence_Store.sequence)):
-            self.save_sequence()
-            self.Sequence_Store.sequence = deepcopy(result_sequence)
+        for i in range(0, len(self.sequence_store.sequence)):
+            if(isPrime(self.sequence_store.sequence[i])):
+                result_sequence.append(self.sequence_store.sequence[i])
+        if(len(result_sequence) != len(self.sequence_store.sequence)):
+            self.sequence_store.sequence = deepcopy(result_sequence)
+            self._save_sequence()
         return result_sequence
     
     def filter_negative(self):
         """
             Eliminates all numbers that are not negative from the sequence
+            Returns:
+                A sequence containing all negative numbers of the sequence
         """
         result_sequence = []
-        for i in range(0, len(self.Sequence_Store.sequence)):
-            if(self.Sequence_Store.sequence[i] < 0):
-                result_sequence.append(self.Sequence_Store.sequence[i])
-        if(len(result_sequence) != len(self.Sequence_Store.sequence)):
-            self.save_sequence()
-            self.Sequence_Store.sequence = deepcopy(result_sequence)
+        for i in range(0, len(self.sequence_store.sequence)):
+            if(self.sequence_store.sequence[i] < 0):
+                result_sequence.append(self.sequence_store.sequence[i])
+        if(len(result_sequence) != len(self.sequence_store.sequence)):
+            self.sequence_store.sequence = deepcopy(result_sequence)
+            self._save_sequence()
         return result_sequence
     
-    def save_sequence(self, setNoCopy = False):
+    def _save_sequence(self):
         """
-            Saves the subsequence if the noCopy flag has not been triggered
+            Saves the subsequence
+            Used after a destructive operation
         """
-        if(not self.Sequence_Store.noCopy):
-            self.Sequence_Store.LSO_sequence.append(deepcopy(self.Sequence_Store.sequence))
-            if(setNoCopy):
-                self.Sequence_Store.noCopy = True
+        self.sequence_store.LSO_index += 1
+        self.sequence_store.LSO_sequence = self.sequence_store.LSO_sequence[0:self.sequence_store.LSO_index]
+        self.sequence_store.LSO_sequence.append(deepcopy(self.sequence_store.sequence))
+    
+    def redo(self):
+        """
+            Redoes an operation
+        """
+        self.sequence_store.LSO_index += 1
+        if(self.sequence_store.LSO_index == len(self.sequence_store.LSO_sequence)):
+            self.sequence_store.LSO_index -= 1
+            raise IndexError('Redo is impossible')
+        self.sequence_store.sequence = deepcopy(self.sequence_store.LSO_sequence[self.sequence_store.LSO_index])
+        return self.sequence_store.sequence
     
     def undo(self):
         """
-            Reverses the effect of the last operation that had an effect on the given sequence
+            Reverse the sequence a state before the last successfull distructive operation
         """
-        
-        #if(len(self.Sequence_Store.LSO_sequence) - 1 < 0 or self.Sequence_Store.LSO_sequence[len(self.Sequence_Store.LSO_sequence) - 1] == self.Sequence_Store.sequence):
-        #    raise ValueError('Undo is unnecessary')
-        self.Sequence_Store.sequence = deepcopy(self.Sequence_Store.LSO_sequence[len(self.Sequence_Store.LSO_sequence) - 1])
-        self.Sequence_Store.LSO_sequence = self.Sequence_Store.LSO_sequence[:len(self.Sequence_Store.LSO_sequence) - 1]
-        return self.Sequence_Store.sequence
+        self.sequence_store.LSO_index -= 1
+        if(self.sequence_store.LSO_index < -1):
+            self.sequence_store.LSO_index += 1
+            raise IndexError('Undo is impossible')
+        if(self.sequence_store.LSO_index == -1): 
+            self.sequence_store.sequence = []
+            return []
+        self.sequence_store.sequence = deepcopy(self.sequence_store.LSO_sequence[self.sequence_store.LSO_index])
+        #self.sequence_store.LSO_sequence = self.sequence_store.LSO_sequence[:len(self.sequence_store.LSO_sequence) - 1]
+        return self.sequence_store.sequence
