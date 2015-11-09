@@ -3,6 +3,7 @@ Created on Nov 8, 2015
 
 @author: AlexandruD
 '''
+from _random import Random
 
 class IdHandler(object):
     '''
@@ -10,12 +11,20 @@ class IdHandler(object):
     '''
 
     @staticmethod
-    def getStudID(self):
-        pass
+    def getStudID(studRepo):
+        id = -1
+        for stud in studRepo:
+            if(stud.getID() > id):
+                id = stud.getID()
+        return id + 1
     
     @staticmethod
-    def getDiscID(self):     
-        pass
+    def getDiscID(discRepo):     
+        id = -1
+        for disc in discRepo:
+            if(disc.getID() > id):
+                id = disc.getID()
+        return id + 1
     
 class Validator():
     
