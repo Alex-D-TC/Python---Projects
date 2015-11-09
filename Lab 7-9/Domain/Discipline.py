@@ -11,12 +11,12 @@ class Discipline(object):
     '''
 
 
-    def __init__(self, name, teacher):
+    def __init__(self, name, teacher, discRepo = []):
         '''
         Constructor
         '''
         self.__name = name
-        self.__id = IdHandler.getDiscID()
+        self.__id = IdHandler.getDiscID(discRepo)
         self.__teacher = teacher
         self.__grades = []
         
@@ -26,6 +26,15 @@ class Discipline(object):
     def getID(self):
         return self.__id
     
+    def getName(self):
+        return self.__name
+    
+    def getTeacher(self):
+        return self.__teacher
+    
+    def getGrades(self):
+        return self.__grades
+    
     def addGrade(self, grade):
         try: gradeCount = len(grade)
         except ValueError: gradeCount = 0
@@ -34,3 +43,7 @@ class Discipline(object):
         else:
             for i in range(0, len(grade)):
                 self.__grades.append(grade[i])
+                
+    def displayDiscipline(self):
+        return '''Discipline id: {} Discipline name: {} Discipline teacher: {}
+'''.format(self.getID(), self.getName(), self.getTeacher())
