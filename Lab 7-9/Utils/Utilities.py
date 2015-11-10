@@ -3,8 +3,6 @@ Created on Nov 8, 2015
 
 @author: AlexandruD
 '''
-from _random import Random
-
 class IdHandler(object):
     '''
     classdocs
@@ -13,6 +11,8 @@ class IdHandler(object):
     @staticmethod
     def getStudID(studRepo):
         id = -1
+        if(studRepo == []): 
+            return 0
         for stud in studRepo:
             if(stud.getID() > id):
                 id = stud.getID()
@@ -21,6 +21,8 @@ class IdHandler(object):
     @staticmethod
     def getDiscID(discRepo):     
         id = -1
+        if(discRepo == []):
+            return 0
         for disc in discRepo:
             if(disc.getID() > id):
                 id = disc.getID()
@@ -38,13 +40,19 @@ class Validator():
 class FileOperationHandler(object):
     """
     """
+    def __init__(self, file = None):
+        self.__file = file
+    
     def setFile(self, file):
         self.__file = file
     
     def _fetchStudent(self):
         studLine = self.__fetchLine()
         if(studLine == ['']): return studLine
-        studDiscCount = Validator.validateInt(studLine.pop(2))
+        if(len(studLine) <= 2):
+            studDiscCount = 0
+        else:
+            studDiscCount = Validator.validateInt(studLine.pop(2))
         while(studDiscCount > 0):
             studLine.append(self.__fetchDisciplineStud())
             studDiscCount -= 1
@@ -90,3 +98,11 @@ class FileOperationHandler(object):
             line[i] = Validator.validate_int(line[i])
         return line
         
+class RepoSearcher():
+    
+    @staticmethod
+    def searchRepo(target, repo):
+        for object in repo:
+            if(target == repo):
+                return False
+        return True

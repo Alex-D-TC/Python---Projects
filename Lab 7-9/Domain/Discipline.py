@@ -11,12 +11,15 @@ class Discipline(object):
     '''
 
 
-    def __init__(self, name, teacher, discRepo = []):
+    def __init__(self, name, teacher, discID = -1, discRepo = []):
         '''
         Constructor
         '''
         self.__name = name
-        self.__id = IdHandler.getDiscID(discRepo)
+        if(discID == -1):
+            self.__id = IdHandler.getDiscID(discRepo)
+        else:
+            self.__id = discID
         self.__teacher = teacher
         self.__grades = []
         
@@ -35,9 +38,18 @@ class Discipline(object):
     def getGrades(self):
         return self.__grades
     
+    def getGradeString(self):
+        gradeString = ''
+        if(self.__grades != []):
+            gradeString = gradeString + 'Grades: '
+            for grade in self.__grades:
+                gradeString = gradeString + str(grade) + ','
+        gradeString = gradeString[:len(gradeString) - 1]
+        return gradeString + '\n'
+    
     def addGrade(self, grade):
         try: gradeCount = len(grade)
-        except ValueError: gradeCount = 0
+        except TypeError: gradeCount = 0
         if(gradeCount == 0):
             self.__grades.append(grade)
         else:
@@ -45,5 +57,14 @@ class Discipline(object):
                 self.__grades.append(grade[i])
                 
     def displayDiscipline(self):
-        return '''Discipline id: {} Discipline name: {} Discipline teacher: {}
-'''.format(self.getID(), self.getName(), self.getTeacher())
+        discString = ''' Discipline id: {}\n Discipline name: {}\n Discipline teacher: {}\n Grades: {}'''.format(self.getID(), self.getName(), self.getTeacher(), self.getGradeString())
+        
+        discString = discString[:len(discString)-1]
+        discString = discString + '\n'
+        return discString
+
+    def __eq__(self, other):
+        if(self.getName() == other.getName()):
+            if(self.getTeacher() == other.getTeacher()):
+                return True
+        return False

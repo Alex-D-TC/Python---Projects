@@ -4,7 +4,6 @@ Created on Nov 8, 2015
 @author: AlexandruD
 '''
 from Utils.Utilities import Validator
-from Domain.Discipline import Discipline
 
 class DisciplineController(object):
     '''
@@ -12,18 +11,11 @@ class DisciplineController(object):
     '''
 
 
-    def __init__(self):
+    def __init__(self, discRepo):
         '''
         Constructor
         '''
-    
-    def toDiscipline(self, disciplineList):
-        discId = Validator.validateInt(disciplineList[0])
-        discName = disciplineList[1]
-        discProf = disciplineList[2]
-        discipline = Discipline(discName, discProf)
-        discipline.setID(discId)
-        return discipline
+        self.__discRepo = discRepo
     
     def toDisciplineByID(self, disc, disciplineList):
         discID = Validator.validateInt(disc[0])
@@ -34,13 +26,14 @@ class DisciplineController(object):
         discipline.addGrade(discGrades)
         return discipline
     
-    def getDisciplineByID(self, ID, disciplineList):
-        for discipline in disciplineList:
-            if(discipline.getID() == ID): return discipline
-        raise ValueError('Discipline not found')
+    def getFile(self):
+        return self.__discRepo.getFile()
     
-    def displayDisciplines(self, disciplineList):
-        disciplineArray = []
-        for discipline in disciplineList:
-            disciplineArray.append(discipline.displayDiscipline())
-        return disciplineArray
+    def getDiscByID(self, ID):
+        return self.__discRepo.getDiscByID(ID)
+    
+    def displayDisciplines(self):
+        return self.__discRepo.displayDisciplines()
+    
+    def addDiscipline(self, disciplineName, teacherName, disciplineID = -1):
+        self.__discRepo.addDiscipline(disciplineName, teacherName, disciplineID)

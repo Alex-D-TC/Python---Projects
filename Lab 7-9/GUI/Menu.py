@@ -4,9 +4,6 @@ Created on Nov 8, 2015
 @author: AlexandruD
 '''
 from Utils.Utilities import Validator
-from Repository.GeneralRepository import GeneralRepository
-from Controller.DisciplineController import DisciplineController
-from Controller.StudentController import StudentController
 
 class Menu(object):
     '''
@@ -19,16 +16,16 @@ class Menu(object):
   4: Display students
   5: Display disciplines""")
     
-    def __init__(self):
+    def __init__(self, studentController, disciplineController):
         '''
         Constructor
         '''
-        self.__disciplineController = DisciplineController()
-        self.__studentController = StudentController(self.__disciplineController.toDisciplineByID)
-        self.__generalRepository = GeneralRepository(self.__studentController, self.__disciplineController)
+        self.__studentController = studentController
+        self.__disciplineController = disciplineController
         self.__princCommandDictionary = {1: self.addItem,
                                          4: self.displayStudents,
-                                         5: self.displayDisciplines}        
+                                         5: self.displayDisciplines}   
+             
     def runMenu(self):
         command = 1
         while(command != 0):
@@ -55,19 +52,22 @@ class Menu(object):
                 print('Invalid input')
         if(command == 1):
             studentName = input("Insert student name: ")
-            self.__studentController.addStudent(studentName, self.__generalRepository.getStudents())
+            self.__studentController.addStudent(studentName)
         else:
-            pass
+            disciplineName = input("Insert discipline name: ")
+            teacherName = input("Insert teacher name: ")
+            self.__disciplineController.addDiscipline(disciplineName, teacherName)
         
     def displayStudents(self):
         print("")
-        studentArray = self.__studentController.displayStudents(self.__generalRepository.getStudents())
+        studentArray = self.__studentController.displayStudents()
         for student in studentArray:
             for line in student:
                 print(line)
     
     def displayDisciplines(self):
         print("")
-        disciplineArray = self.__disciplineController.displayDisciplines(self.__generalRepository.getDisciplines())       
+        disciplineArray = self.__disciplineController.displayDisciplines()       
         for discipline in disciplineArray:
             print(discipline)
+    

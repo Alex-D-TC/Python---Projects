@@ -11,12 +11,15 @@ class Student(object):
     '''
 
 
-    def __init__(self, name, studRepo = []):
+    def __init__(self, name, id = -1,  studRepo = []):
         '''
         Constructor
         '''
         self.__name = name
-        self.__id = IdHandler.getStudID(studRepo)
+        if(id == -1):
+            self.__id = IdHandler.getStudID(studRepo)
+        else:
+            self.__id = id
         self.__disciplines = []
         
     def setID(self, ID):
@@ -32,8 +35,20 @@ class Student(object):
         self.__disciplines.append(discipline)
         
     def displayStudent(self):
-        studArray =  ['''Student id: {} Student name: {}
+        studArray =  ['''Student id: {}\n Student name: {}\n
 '''.format(self.getID(), self.getName())]
         for discipline in self.__disciplines:
             studArray.append(discipline.displayDiscipline())
         return studArray
+    
+    def getDisciplines(self):
+        return self.__disciplines
+    
+    def setDisciplines(self):
+        return self.__disciplines
+    
+    
+    def __eq__(self, other):
+        if(self.getName() == other.getName()):
+            return True
+        return False
